@@ -1,4 +1,4 @@
-name: Scrape Checkers Deals
+name: Scrape Deals
 
 on:
   schedule:
@@ -29,9 +29,11 @@ jobs:
         run: |
           echo '${{ secrets.FIREBASE_CREDENTIALS }}' > cartly-firebase.json
 
-      - name: Run scraper
-        run: |
-          python checkers_scraper.py
+      - name: Run Checkers scraper
+        run: python checkers_scraper.py
+
+      - name: Run Pick n Pay scraper
+        run: python pnp_scraper.py
 
       - name: Done
-        run: echo "Scraper finished successfully!"
+        run: echo "All scrapers finished successfully!"

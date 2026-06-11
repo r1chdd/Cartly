@@ -18,38 +18,38 @@
 
 ---
 
-## 📱 About Cartly
+##  About Cartly
 
 Cartly helps South Africans find the best grocery deals and specials from stores near them. No more driving around looking for the best price — Cartly shows you everything in one place.
 
-## ✨ Features
+##  Features
 
-- 🔴 **Live grocery deals** from Checkers, Pick n Pay, Shoprite and Spar (hardcode)
-- 🔍 **Search** for specific products instantly
-- 🏪 **Filter by store** to see deals from your favourite store
-- ❤️ **Save favourite deals** that sync across sessions
-- 🌙 **Dark mode** support
-- ⚙️ **Settings** to customise your location and preferences
-- 🔄 **Pull down to refresh** for latest deals
+-  **Live grocery deals** from Checkers, Pick n Pay, Shoprite and Spar (hardcode)
+-  **Search** for specific products instantly
+-  **Filter by store** to see deals from your favourite store
+-  **Save favourite deals** that sync across sessions
+-  **Dark mode** support
+-  **Settings** to customise your location and preferences
+-  **Pull down to refresh** for latest deals
 
 ## 📸 Screenshots
 
 Coming soon
 
-## 🚀 Download
+##  Download
 
 Head to the [Releases](../../releases) page to download the latest APK.
 
 > **Note:** This is a debug build for testing purposes. Enable **"Install from unknown sources"** on your Android phone to install.
 
-## 🛠️ Built With
+##  Built With
 
 - [Kotlin](https://kotlinlang.org/) - Programming language
 - [Firebase Firestore](https://firebase.google.com/) - Live database
 - [Material Design 3](https://m3.material.io/) - UI components
 - [Glide](https://github.com/bumptech/glide) - Image loading
 
-## 🗺️ Roadmap
+##  Roadmap
 
 - [ ] Automatic price scraping from store websites 
 - [ ] Product categories
@@ -59,10 +59,10 @@ Head to the [Releases](../../releases) page to download the latest APK.
 - [ ] Price comparison between stores
 - [ ] User submitted prices
 
-## 👨‍💻 Developer
+##  Developer
 
 Built by **Richard** — from zero coding experience to a full Android app! 💪
 
-## 📄 License
+##  License
 
 This project is private and not open for public use yet.

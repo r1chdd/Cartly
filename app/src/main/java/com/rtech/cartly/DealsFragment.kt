@@ -10,12 +10,14 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DealsFragment : Fragment() {
@@ -166,7 +168,8 @@ class DealsFragment : Fragment() {
                         "price_was" to (document.getString("price_was") ?: ""),
                         "discount" to (document.getString("discount") ?: ""),
                         "emoji" to (document.getString("emoji") ?: "🛒"),
-                        "category" to (document.getString("category") ?: "Other")
+                        "category" to (document.getString("category") ?: "Other"),
+                        "image_url" to (document.getString("image_url") ?: "")
                     ))
                 }
                 if (!isAdded) return@addOnSuccessListener
@@ -210,7 +213,7 @@ class DealsFragment : Fragment() {
                 val card = createDealCard(
                     deal["name"]!!, deal["store"]!!, deal["distance"]!!,
                     deal["price_now"]!!, deal["price_was"]!!, deal["discount"]!!,
-                    deal["emoji"]!!, deal["category"]!!
+                    deal["emoji"]!!, deal["category"]!!, deal["image_url"]!!
                 )
                 dealsContainer.addView(card)
             }
@@ -241,7 +244,7 @@ class DealsFragment : Fragment() {
     private fun createDealCard(
         name: String, store: String, distance: String,
         priceNow: String, priceWas: String, discount: String,
-        emoji: String, category: String
+        emoji: String, category: String, imageUrl: String
     ): LinearLayout {
 
         val cardBg = if (isDarkMode()) R.drawable.card_background_dark else R.drawable.card_background
@@ -276,19 +279,26 @@ class DealsFragment : Fragment() {
                 intent.putExtra("price_was", priceWas)
                 intent.putExtra("discount", discount)
                 intent.putExtra("emoji", emoji)
+                intent.putExtra("image_url", imageUrl)
                 startActivity(intent)
             }
         }
 
-        val emojiView = TextView(requireContext()).apply {
-            text = emoji
-            textSize = 32f
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
+        val imageView = ImageView(requireContext()).apply {
+            val params = LinearLayout.LayoutParams(120, 120)
             params.setMargins(0, 0, 24, 0)
             layoutParams = params
+            scaleType = ImageView.ScaleType.CENTER_CROP
+        }
+
+        if (imageUrl.isNotEmpty()) {
+            Glide.with(requireContext())
+                .load(imageUrl)
+                .placeholder(R.drawable.ic_basket)
+                .error(R.drawable.ic_basket)
+                .into(imageView)
+        } else {
+            imageView.setImageResource(R.drawable.ic_basket)
         }
 
         val infoLayout = LinearLayout(requireContext()).apply {
@@ -368,7 +378,7 @@ class DealsFragment : Fragment() {
         priceLayout.addView(priceNowView)
         priceLayout.addView(priceWasView)
 
-        topRow.addView(emojiView)
+        topRow.addView(imageView)
         topRow.addView(infoLayout)
         topRow.addView(priceLayout)
 
