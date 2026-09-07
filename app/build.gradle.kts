@@ -37,6 +37,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true
     }
 }
 
@@ -45,10 +46,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
@@ -59,4 +62,15 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.compose.coil)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
