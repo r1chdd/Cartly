@@ -3,8 +3,10 @@ package com.rtech.cartly.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.GeoPoint
 import com.rtech.cartly.data.DealsRepository
 import com.rtech.cartly.data.FavouritesRepository
+import com.rtech.cartly.data.StoreLocations
 import com.rtech.cartly.data.UserProvider
 import com.rtech.cartly.model.Deal
 
@@ -22,6 +24,12 @@ class DealsViewModel : ViewModel() {
     private val _isLoading = MutableLiveData<Boolean>(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _userLocation = MutableLiveData<GeoPoint?>(null)
+    val userLocation: LiveData<GeoPoint?> = _userLocation
+
+    private val _locationLabel = MutableLiveData("Nearby")
+    val locationLabel: LiveData<String> = _locationLabel
+
     private var hasLoaded = false
     val isLoaded: Boolean get() = hasLoaded
 
@@ -29,6 +37,36 @@ class DealsViewModel : ViewModel() {
 
     var selectedStore = "All"
     var selectedCategory = "All"
+
+    fun setUserLocation(latitude: Double, longitude: Double) {
+        _userLocation.value = GeoPoint(latitude, longitude)
+        reapplyLocation()
+    }
+
+    fun clearUserLocation() {
+        _userLocation.value = null
+        reapplyLocation()
+    }
+
+    fun setLocationLabel(label: String) {
+        _locationLabel.value = if (label.isBlank()) "Nearby" else label
+    }
+
+    private fun reapplyLocation() {
+        if (hasLoaded) _deals.value = decorate(_deals.value.orEmpty())
+    }
+
+    private fun decorate(rawList: List<Deal>): List<Deal> {
+        val location = _userLocation.value
+        val labelled = rawList.map { deal ->
+            val label = StoreLocations.distanceLabel(deal.store, location)
+            if (label != null) deal.copy(distance = label) else deal
+        }
+        if (location == null) return labelled
+        return labelled.sortedBy { deal ->
+            StoreLocations.nearestBranchDistance(deal.store, location) ?: Double.MAX_VALUE
+        }
+    }
 
     fun loadData() {
         if (hasLoaded) return
@@ -77,7 +115,7 @@ class DealsViewModel : ViewModel() {
             .addOnSuccessListener { list ->
                 if (token != loadToken) return@addOnSuccessListener
                 hasLoaded = true
-                _deals.value = list
+                _deals.value = decorate(list)
                 if (showLoading) _isLoading.value = false
             }
             .addOnFailureListener {

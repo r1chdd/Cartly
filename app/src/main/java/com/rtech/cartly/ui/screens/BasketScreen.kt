@@ -72,24 +72,22 @@ fun BasketScreen(viewModel: BasketViewModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primary)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "My Basket",
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
             Text(
                 text = "Clear all",
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 modifier = Modifier
                     .clickable { viewModel.clearBasket() }
-                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
                     .padding(8.dp)
             )
         }

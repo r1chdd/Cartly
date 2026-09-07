@@ -78,12 +78,11 @@ fun ProfileScreen(
     ) {
         Text(
             text = "My Profile",
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primary)
                 .padding(16.dp)
         )
 
