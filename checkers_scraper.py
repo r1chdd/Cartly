@@ -42,6 +42,27 @@ def categorize(name):
     else:
         return "Other"
 
+def full_price(p):
+    parts = [s.text for s in p.find_elements(By.CSS_SELECTOR, "span")]
+    text = "".join(parts).strip()
+    return text if text else p.text
+
+def join_span_prices(elems):
+    """Rejoin split prices like 'R499' + '.99' back into 'R499.99'."""
+    prices = []
+    i = 0
+    while i < len(elems):
+        t = elems[i].text.strip()
+        if t.startswith("R") and i + 1 < len(elems):
+            nxt = elems[i + 1].text.strip()
+            if nxt.startswith("."):
+                prices.append(t + nxt)
+                i += 2
+                continue
+        prices.append(t)
+        i += 1
+    return prices
+
 def scrape_checkers(db):
     print("Starting Checkers scraper...")
     options = webdriver.ChromeOptions()
@@ -58,28 +79,34 @@ def scrape_checkers(db):
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     try:
-        print("Opening Checkers specials page...")
-        driver.get("https://www.checkers.co.za/specials")
-        print("Waiting 20 seconds for products to load...")
-        time.sleep(20)
+        products = []
+        attempts = 0
+        while len(products) == 0 and attempts < 3:
+            attempts += 1
+            print("Opening Checkers specials page (attempt " + str(attempts) + ")...")
+            driver.get("https://www.checkers.co.za/specials")
+            print("Waiting 20 seconds for products to load...")
+            time.sleep(20)
 
-        print("Page title: " + driver.title)
+            print("Page title: " + driver.title)
 
-        # Scroll down the page to trigger any lazy-loaded images before scraping
-        print("Scrolling to trigger lazy-loaded images...")
-        last_height = driver.execute_script("return document.body.scrollHeight")
-        for _ in range(6):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(1.5)
-            new_height = driver.execute_script("return document.body.scrollHeight")
-            if new_height == last_height:
-                break
-            last_height = new_height
-        driver.execute_script("window.scrollTo(0, 0);")
-        time.sleep(2)
+            # Scroll down the page to trigger any lazy-loaded images before scraping
+            print("Scrolling to trigger lazy-loaded images...")
+            last_height = driver.execute_script("return document.body.scrollHeight")
+            for _ in range(6):
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(1.5)
+                new_height = driver.execute_script("return document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                last_height = new_height
+            driver.execute_script("window.scrollTo(0, 0);")
+            time.sleep(2)
 
-        products = driver.find_elements(By.CSS_SELECTOR, "div[class*='DsB3']")
-        print("Found " + str(len(products)) + " product cards")
+            products = driver.find_elements(By.CSS_SELECTOR, "div[class*='DsB3']")
+            print("Found " + str(len(products)) + " product cards")
+            if len(products) == 0:
+                print("No product cards rendered - the specials page may be empty right now")
 
         deals = []
         for product in products:
@@ -109,10 +136,11 @@ def scrape_checkers(db):
 
                 try:
                     price_elems = product.find_elements(By.CSS_SELECTOR, "span[class*='price']")
-                    if price_elems:
-                        price_now = price_elems[0].text
-                    if len(price_elems) > 1:
-                        price_was = price_elems[1].text
+                    prices = join_span_prices(price_elems)
+                    if prices:
+                        price_now = prices[0]
+                    if len(prices) > 1:
+                        price_was = prices[1]
                 except:
                     pass
 
