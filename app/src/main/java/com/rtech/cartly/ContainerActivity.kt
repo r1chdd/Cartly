@@ -1,7 +1,9 @@
 package com.rtech.cartly
 
 import android.os.Bundle
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -11,11 +13,10 @@ class ContainerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_container)
 
-        window.navigationBarColor = android.graphics.Color.parseColor("#F8F8F8")
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            window.decorView.systemUiVisibility =
-                android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        }
+        val darkMode = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightNavigationBars = !darkMode
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         if (savedInstanceState == null) {
