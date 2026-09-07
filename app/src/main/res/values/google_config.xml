@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google web client ID used for ID token verification (client_type 3 in google-services.json). -->
+    <string name="default_web_client_id" translatable="false">179083447885-u0hm3n142q61hgbovbgudlfanqs55sgn.apps.googleusercontent.com</string>
+</resources>

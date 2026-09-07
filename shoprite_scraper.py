@@ -42,8 +42,28 @@ def categorize(name):
     else:
         return "Other"
 
-def scrape_checkers(db):
-    print("Starting Checkers scraper...")
+def find_product_cards(driver):
+    # Shoprite and Checkers share the same platform (Shoprite Holdings),
+    # so start with the same card class, then fall back to broader selectors.
+    selectors = [
+        "div[class*='DsB3']",
+        "div[class*='product-tile']",
+        "div[class*='product-card']",
+        "div[class*='product']",
+        "div[class*='Product']"
+    ]
+    for selector in selectors:
+        try:
+            cards = driver.find_elements(By.CSS_SELECTOR, selector)
+            if len(cards) > 0:
+                print("Product cards found with selector: " + selector)
+                return cards
+        except:
+            pass
+    return []
+
+def scrape_shoprite(db):
+    print("Starting Shoprite scraper...")
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -58,12 +78,13 @@ def scrape_checkers(db):
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     try:
-        print("Opening Checkers specials page...")
-        driver.get("https://www.checkers.co.za/specials")
+        print("Opening Shoprite specials page...")
+        driver.get("https://www.shoprite.co.za/specials")
         print("Waiting 20 seconds for products to load...")
         time.sleep(20)
 
         print("Page title: " + driver.title)
+        print("Page URL: " + driver.current_url)
 
         # Scroll down the page to trigger any lazy-loaded images before scraping
         print("Scrolling to trigger lazy-loaded images...")
@@ -78,10 +99,11 @@ def scrape_checkers(db):
         driver.execute_script("window.scrollTo(0, 0);")
         time.sleep(2)
 
-        products = driver.find_elements(By.CSS_SELECTOR, "div[class*='DsB3']")
+        products = find_product_cards(driver)
         print("Found " + str(len(products)) + " product cards")
 
         deals = []
+        seen = set()
         for product in products:
             try:
                 name = ""
@@ -89,6 +111,7 @@ def scrape_checkers(db):
                 price_was = ""
                 image_url = ""
 
+                # The product-card-link <a> carries the name in aria-label on this platform
                 try:
                     name_elem = product.find_element(By.CSS_SELECTOR, "a[data-testid='product-card-link']")
                     name = name_elem.get_attribute("aria-label") or name_elem.text
@@ -107,14 +130,32 @@ def scrape_checkers(db):
                     except:
                         pass
 
+                # Shoprite splits each price into rand/cents spans (R59 + .99)
+                # inside a <p class="...price-display_price-text..."> per price point,
+                # so join the spans to reconstruct the full price.
+                price_groups = []
                 try:
-                    price_elems = product.find_elements(By.CSS_SELECTOR, "span[class*='price']")
-                    if price_elems:
-                        price_now = price_elems[0].text
-                    if len(price_elems) > 1:
-                        price_was = price_elems[1].text
+                    price_groups = product.find_elements(By.CSS_SELECTOR, "p[class*='price-display_price-text']")
                 except:
                     pass
+
+                if price_groups:
+                    def full_price(p):
+                        parts = [s.text for s in p.find_elements(By.CSS_SELECTOR, "span")]
+                        text = "".join(parts).strip()
+                        return text if text else p.text
+                    price_now = full_price(price_groups[0])
+                    if len(price_groups) > 1:
+                        price_was = full_price(price_groups[1])
+                else:
+                    try:
+                        price_elems = product.find_elements(By.CSS_SELECTOR, "span[class*='price']")
+                        if price_elems:
+                            price_now = price_elems[0].text
+                        if len(price_elems) > 1:
+                            price_was = price_elems[1].text
+                    except:
+                        pass
 
                 if not price_now:
                     try:
@@ -122,7 +163,7 @@ def scrape_checkers(db):
                     except:
                         pass
 
-                # --- Image extraction ---
+                # Image extraction
                 try:
                     img_elem = product.find_element(By.CSS_SELECTOR, "img")
                     image_url = (
@@ -138,17 +179,18 @@ def scrape_checkers(db):
                     if image_url.startswith("//"):
                         image_url = "https:" + image_url
                     elif image_url.startswith("/"):
-                        image_url = "https://www.checkers.co.za" + image_url
+                        image_url = "https://www.shoprite.co.za" + image_url
                 except:
                     pass
 
-                if name and len(name) > 3 and price_now:
+                if name and len(name) > 3 and price_now and name not in seen:
+                    seen.add(name)
                     category = categorize(name)
                     deals.append({
                         "name": name,
                         "price_now": price_now,
                         "price_was": price_was if price_was else "",
-                        "store": "Checkers",
+                        "store": "Shoprite",
                         "category": category,
                         "distance": "Nearby",
                         "image_url": image_url
@@ -164,12 +206,12 @@ def scrape_checkers(db):
 
         if len(deals) > 0:
             print("Pushing to Firebase...")
-            existing = db.collection("deals").where("store", "==", "Checkers").get()
+            existing = db.collection("deals").where("store", "==", "Shoprite").get()
             for doc in existing:
                 doc.reference.delete()
 
             for i, deal in enumerate(deals):
-                db.collection("deals").document("checkers_" + str(i)).set(deal)
+                db.collection("deals").document("shoprite_" + str(i)).set(deal)
 
             print("Successfully pushed " + str(len(deals)) + " deals to Firebase!")
         else:
@@ -177,10 +219,12 @@ def scrape_checkers(db):
 
     except Exception as e:
         print("Error: " + str(e))
+        import traceback
+        traceback.print_exc()
     finally:
         driver.quit()
 
 print("Initialising Firebase...")
 db = init_firebase()
-scrape_checkers(db)
+scrape_shoprite(db)
 print("All done!")

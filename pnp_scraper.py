@@ -42,19 +42,6 @@ def categorize(name):
     else:
         return "Other"
 
-def get_emoji(category):
-    return {
-        "Dairy": "🥛",
-        "Bread & Bakery": "🍞",
-        "Meat & Poultry": "🍗",
-        "Fruit & Veg": "🥦",
-        "Drinks": "🥤",
-        "Cooking & Oils": "🫙",
-        "Snacks & Treats": "🍫",
-        "Household": "🧹",
-        "Other": "🛒"
-    }.get(category, "🛒")
-
 def clean_price(text):
     """Extract only the first price from a string like 'R16.99 R17.69'"""
     if not text:
@@ -137,24 +124,41 @@ def scrape_pnp(db):
                 if price_was == price_now:
                     price_was = ""
 
-                # Get image
+                # The real product image lives inside <cx-media>; the first <img>
+                # in a card can be a generic banner (e.g. LiveWell.png).
+                image_url = ""
                 try:
-                    img = product.find_element(By.CSS_SELECTOR, "img")
-                    image_url = img.get_attribute("src") or img.get_attribute("data-src") or ""
+                    img = product.find_element(By.CSS_SELECTOR, "cx-media img")
+                    image_url = img.get_attribute("src") or ""
+                    if not image_url:
+                        try:
+                            source = product.find_element(By.CSS_SELECTOR, "cx-media source")
+                            image_url = source.get_attribute("srcset") or ""
+                            if image_url and "," in image_url:
+                                image_url = image_url.split(",")[0].strip().split(" ")[0]
+                        except:
+                            pass
                 except:
-                    pass
+                    try:
+                        img = product.find_element(By.CSS_SELECTOR, "img")
+                        image_url = img.get_attribute("src") or img.get_attribute("data-src") or ""
+                    except:
+                        pass
+
+                if image_url.startswith("//"):
+                    image_url = "https:" + image_url
+                elif image_url.startswith("/"):
+                    image_url = "https://www.pnp.co.za" + image_url
 
                 if name and price_now:
                     seen.add(name)
                     category = categorize(name)
-                    emoji = get_emoji(category)
                     deals.append({
                         "name": name,
                         "price_now": price_now,
                         "price_was": price_was,
                         "store": "Pick n Pay",
                         "category": category,
-                        "emoji": emoji,
                         "distance": "Nearby",
                         "image_url": image_url
                     })

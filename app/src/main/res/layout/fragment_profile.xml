@@ -37,11 +37,12 @@
             android:gravity="center"
             android:padding="40dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="👤"
-                android:textSize="64sp"
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_profile"
+                android:tint="@color/textSecondary"
+                android:contentDescription="Sign in to Cartly"
                 android:layout_marginBottom="16dp"/>
 
             <TextView
@@ -89,7 +90,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="⚙ Settings"
+                    android:text="Settings"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/textPrimary"/>
@@ -124,11 +125,12 @@
                 android:layout_margin="16dp"
                 android:elevation="4dp">
 
-                <TextView
+                <ImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:text="👤"
-                    android:textSize="36sp"
+                    android:src="@drawable/ic_profile"
+                    android:tint="#FFFFFF"
+                    android:contentDescription="Profile"
                     android:gravity="center"
                     android:background="@color/cartlyGreen"
                     android:layout_marginEnd="16dp"/>
@@ -180,11 +182,12 @@
                     android:layout_marginEnd="8dp"
                     android:elevation="4dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🛒"
-                        android:textSize="28sp"/>
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_basket"
+                        android:tint="@color/textSecondary"
+                        android:contentDescription="Basket count" />
 
                     <TextView
                         android:id="@+id/basketCount"
@@ -208,11 +211,12 @@
                     android:layout_marginStart="8dp"
                     android:elevation="4dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="❤️"
-                        android:textSize="28sp"/>
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_heart"
+                        android:tint="#E24B4A"
+                        android:contentDescription="Saved deals count" />
 
                     <TextView
                         android:id="@+id/savingsCount"
@@ -245,7 +249,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="⚙ Settings"
+                    android:text="Settings"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/textPrimary"/>

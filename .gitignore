@@ -12,4 +12,6 @@
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# Firebase Admin SDK service account (contains a private key)
+/cartly-firebase.json

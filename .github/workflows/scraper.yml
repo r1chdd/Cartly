@@ -35,5 +35,8 @@ jobs:
       - name: Run Pick n Pay scraper
         run: python pnp_scraper.py
 
+      - name: Run Shoprite scraper
+        run: python shoprite_scraper.py
+
       - name: Done
         run: echo "All scrapers finished successfully!"

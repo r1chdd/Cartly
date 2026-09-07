@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Deals are public read-only data written by the scraper (Admin SDK bypasses rules).
+    match /deals/{dealId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Favourites are owned by a single user.
+    match /favourites/{docId} {
+      allow read, update, delete: if request.auth != null
+          && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null
+          && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Basket items are owned by a single user.
+    match /basket/{docId} {
+      allow read, update, delete: if request.auth != null
+          && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null
+          && request.auth.uid == request.resource.data.userId;
+    }
+  }
+}

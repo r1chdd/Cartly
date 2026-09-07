@@ -37,22 +37,14 @@
 
         </LinearLayout>
 
-        <!-- EMOJI HERO -->
-        <LinearLayout
+        <!-- HERO IMAGE -->
+        <ImageView
+            android:id="@+id/detailImage"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="200dp"
             android:background="@color/cartlyGreen"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/detailEmoji"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🥛"
-                android:textSize="72sp"/>
-
-        </LinearLayout>
+            android:scaleType="centerCrop"
+            android:contentDescription="Product image" />
 
         <!-- MAIN CARD -->
         <LinearLayout
@@ -225,13 +217,6 @@
                 android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🏪"
-                    android:textSize="20sp"
-                    android:layout_marginEnd="12dp"/>
-
-                <TextView
                     android:id="@+id/detailStoreName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -246,13 +231,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📍"
-                    android:textSize="20sp"
-                    android:layout_marginEnd="12dp"/>
 
                 <TextView
                     android:id="@+id/detailDistance"
@@ -271,7 +249,7 @@
             android:id="@+id/btnAddToBasket"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🛒 Add to Basket"
+            android:text="Add to Basket"
             android:textSize="16sp"
             android:textColor="#FFFFFF"
             android:textStyle="bold"

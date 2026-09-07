@@ -11,19 +11,22 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FirebaseFirestore
+import com.rtech.cartly.data.UserProvider
+import com.rtech.cartly.viewmodel.ProfileViewModel
 
 class ProfileFragment : Fragment() {
 
+    private val viewModel: ProfileViewModel by activityViewModels()
+
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val db = FirebaseFirestore.getInstance()
 
     private lateinit var signedOutLayout: LinearLayout
     private lateinit var signedInLayout: LinearLayout
@@ -60,7 +63,7 @@ class ProfileFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("179083447885-u0hm3n142q61hgbovbgudlfanqs55sgn.apps.googleusercontent.com")
+            .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
 
@@ -83,7 +86,9 @@ class ProfileFragment : Fragment() {
         btnSignOut.setOnClickListener {
             auth.signOut()
             googleSignInClient.signOut()
+            UserProvider.ensureSignedIn { }
             updateUI()
+            viewModel.loadStats(null)
         }
 
         val btnSettingsBar = view.findViewById<LinearLayout>(R.id.btnSettingsBar)
@@ -95,33 +100,54 @@ class ProfileFragment : Fragment() {
         btnSettingsBarSignedOut.setOnClickListener {
             startActivity(Intent(requireContext(), SettingsActivity::class.java))
         }
+
+        viewModel.basketCount.observe(viewLifecycleOwner) { count ->
+            basketCount.text = "$count items in basket"
+        }
+
+        viewModel.favouritesCount.observe(viewLifecycleOwner) { count ->
+            savingsCount.text = "$count deals saved"
+        }
+
         updateUI()
-        loadStats()
+        viewModel.loadStats(googleUid())
     }
 
     override fun onResume() {
         super.onResume()
         updateUI()
-        loadStats()
+        viewModel.loadStats(googleUid())
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(requireContext(), "Signed in successfully!", Toast.LENGTH_SHORT).show()
-                    updateUI()
-                    loadStats()
-                } else {
-                    Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show()
-                }
+        val currentUser = auth.currentUser
+
+        val task = if (currentUser != null && currentUser.isAnonymous) {
+            currentUser.linkWithCredential(credential)
+        } else {
+            auth.signInWithCredential(credential)
+        }
+
+        task.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(requireContext(), "Signed in successfully!", Toast.LENGTH_SHORT).show()
+                updateUI()
+                viewModel.loadStats(googleUid())
+            } else {
+                Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun googleUid(): String? {
+        val user = auth.currentUser ?: return null
+        return if (user.isAnonymous) null else user.uid
     }
 
     private fun updateUI() {
         val user = auth.currentUser
-        if (user != null) {
+        if (user != null && !user.isAnonymous) {
             signedOutLayout.visibility = View.GONE
             signedInLayout.visibility = View.VISIBLE
             profileName.text = user.displayName ?: "Cartly User"
@@ -129,22 +155,6 @@ class ProfileFragment : Fragment() {
         } else {
             signedOutLayout.visibility = View.VISIBLE
             signedInLayout.visibility = View.GONE
-        }
-    }
-
-    private fun loadStats() {
-        db.collection("basket").get().addOnSuccessListener { result ->
-            val count = result.documents.filter {
-                it.getString("name") != "placeholder"
-            }.size
-            basketCount.text = "$count items in basket"
-        }
-
-        db.collection("favourites").get().addOnSuccessListener { result ->
-            val count = result.documents.filter {
-                it.getString("name") != "placeholder"
-            }.size
-            savingsCount.text = "$count deals saved"
         }
     }
 }

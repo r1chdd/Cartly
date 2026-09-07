@@ -35,17 +35,30 @@
     </LinearLayout>
 
     <!-- RESULTS -->
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchResults"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="16dp"/>
+            android:layout_height="match_parent"
+            android:paddingTop="16dp"
+            android:clipToPadding="false"/>
 
-    </ScrollView>
+        <TextView
+            android:id="@+id/searchEmptyView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Type to search for deals..."
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"
+            android:gravity="center"
+            android:padding="60dp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
 </LinearLayout>
