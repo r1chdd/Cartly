@@ -6,15 +6,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  actions: write
 
 jobs:
   keepalive:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          days_elapsed: 40
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          auto_push: true
+      - uses: liskin/gh-workflow-keepalive@v1
