@@ -15,4 +15,5 @@ jobs:
       - uses: gautamkrishnar/keepalive-workflow@v2
         with:
           days_elapsed: 40
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           auto_push: true
